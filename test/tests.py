@@ -8,7 +8,7 @@ import os
 class dataReadTests(unittest.TestCase):
 
     def setUp(self):
-        self.session = SparkSession.builder.master("local")\
+        self.session = SparkSession.builder\
           .appName("test_task")\
           .getOrCreate()
         self.cwd = os.getcwd()
