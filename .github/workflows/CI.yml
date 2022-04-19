@@ -32,7 +32,10 @@ jobs:
         
       - name: Install dependencies
         run: pip install -r requirements.txt
-
+      
+      - name: print CWD
+        run: cwd
+      
       # Runs a set of commands using the runners shell
       - name: Run tests
         run: python -m unittest
