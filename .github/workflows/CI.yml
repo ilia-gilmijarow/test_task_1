@@ -25,11 +25,19 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       # add up Apache Spark
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '11'
       - uses: vemonet/setup-spark@v1
-        
-      - name: unset spark dir
-        run: export SPARK_HOME="/home/runner/work/test_task_1/test_task_1/spark"
-        
+        with:
+          spark-version: '3.1.1'
+          hadoop-version: '3.2'
+          spark-url: 'https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-hadoop3.2.tgz'
+      - run: spark-submit --version
+      
       - name: Install dependencies
         run: pip install -r requirements.txt
       
