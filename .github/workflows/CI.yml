@@ -33,4 +33,4 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Run tests
-        run: python -m unittest src
+        run: python -m unittest
