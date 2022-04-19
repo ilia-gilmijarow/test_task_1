@@ -28,7 +28,7 @@ jobs:
       - uses: vemonet/setup-spark@v1
         
       - name: unset spark dir
-        run: export SPARK_HOME="/home/runner/work/test_task_1/spark"
+        run: export SPARK_HOME="/home/runner/work/test_task_1/test_task_1/spark"
         
       - name: Install dependencies
         run: pip install -r requirements.txt
