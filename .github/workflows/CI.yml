@@ -34,7 +34,7 @@ jobs:
         run: pip install -r requirements.txt
       
       - name: print CWD
-        run: cwd
+        run: pwd
       
       # Runs a set of commands using the runners shell
       - name: Run tests
