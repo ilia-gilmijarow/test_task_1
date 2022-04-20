@@ -1,6 +1,6 @@
 import pytest
 import unittest
-from chispa.dataframe_comparer import *
+from chispa.dataframe_comparer import assert_df_equality
 from pyspark.sql import SparkSession
 from pyspark.sql import utils, dataframe, functions
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
@@ -26,64 +26,63 @@ class dataReadTests(unittest.TestCase):
         self.assertIsInstance(the_file, dataframe.DataFrame)
      
      
-# @pytest.fixture()
-# def session():
-    # my_session = SparkSession.builder\
-      # .master('local')\
-      # .appName('chispa')\
-      # .getOrCreate()
-    # return my_session
+@pytest.fixture()
+def session():
+    my_session = SparkSession.builder\
+      .master('local')\
+      .appName('chispa')\
+      .getOrCreate()
+    return my_session
 
-# @pytest.fixture()
-# def schema():
-    # my_schema = StructType([
-                        # StructField('id', IntegerType(), nullable=False),
-                        # StructField('first_name', StringType(), nullable=False),
-                        # StructField('last name', StringType(), nullable=False),
-                        # ])
-    # return my_schema
 
-# @pytest.fixture()
-# def df(session, schema):
-    # data = [
-            # (1, 'Hosea', 'Odonnell'),
-            # (2, 'Murray', 'Weber'),
-            # (3, 'Emory', 'Giles'),
-            # (4, 'Devin', 'Ayala'),
-            # (5, 'Rebekah', 'Rosario'),
-            # (6, 'Tracy', 'Gardner'),
-            # (7, 'Hosea', 'Blackwell'),
-            # (8, 'Madeline', 'Black'),
-            # (9, 'Jim', 'Delacruz'),
-            # (10, 'Abigail', 'Giles')
-            # ]
-    # return session.createDataFrame(data=data, schema=schema)
+@pytest.fixture()
+def schema():
+    my_schema = StructType([
+                        StructField('id', IntegerType(), nullable=False),
+                        StructField('first_name', StringType(), nullable=False),
+                        StructField('last name', StringType(), nullable=False),
+                        ])
+    return my_schema
+
+
+@pytest.fixture()
+def df(session, schema):
+    data = [
+            (1, 'Hosea', 'Odonnell'),
+            (2, 'Murray', 'Weber'),
+            (3, 'Emory', 'Giles'),
+            (4, 'Devin', 'Ayala'),
+            (5, 'Rebekah', 'Rosario'),
+            (6, 'Tracy', 'Gardner'),
+            (7, 'Hosea', 'Blackwell'),
+            (8, 'Madeline', 'Black'),
+            (9, 'Jim', 'Delacruz'),
+            (10, 'Abigail', 'Giles')
+            ]
+    return session.createDataFrame(data=data, schema=schema)
+    
+
+def test_filtering_by_collection_leaves_needed_rows(session, schema, df):
+    remaining_data = [
+            (1, 'Hosea', 'Odonnell'),
+            (5, 'Rebekah', 'Rosario'),
+            (7, 'Hosea', 'Blackwell')
+            ]
+    remaining_df = session.createDataFrame(data=remaining_data, 
+                                                schema=schema)
+    filters = ['Hosea', 'Rebekah']
+    filtered = main.filter_df(df, 'first_name', filters)
+    assert_df_equality(remaining_df, filtered)
     
     
-# @pytest.fixture()
-# def df2(session, schema):
-    # data = [
-            # (1, 'Hosea', 'Odonnell'),
-            # (2, 'Murray', 'Weber'),
-            # (3, 'Emory', 'Giles'),
-            # (4, 'Devin', 'Ayala'),
-            # (5, 'Rebekah', 'Rosario'),
-            # (6, 'Tracy', 'Gardner'),
-            # (7, 'Hosea', 'Blackwell'),
-            # (8, 'Madeline', 'Black'),
-            # (9, 'Jim', 'Delacruz'),
-            # (10, 'Abigail', 'Giles')
-            # ]
-    # return session.createDataFrame(data=data, schema=schema)
+def test_filtering_by_string_leaves_needed_rows(session, schema, df):
+    remaining_data = [
+            (1, 'Hosea', 'Odonnell'),
+            (7, 'Hosea', 'Blackwell')
+            ]
+    remaining_df = session.createDataFrame(data=remaining_data, 
+                                                schema=schema)
+    filters = 'Hosea'
+    filtered = main.filter_df(df, 'first_name', filters)
+    assert_df_equality(remaining_df, filtered)
 
-
-# def test_filtering_leaves_needed_rows(session, schema, df, df2):
-    # # remaining_data = [
-            # # (1, 'Hosea', 'Odonnell'),
-            # # (5, 'Rebekah', 'Rosario'),
-            # # (7, 'Hosea', 'Blackwell')
-            # # ]
-    # # remaining_df = session.createDataFrame(data=remaining_data, 
-                                                # # schema=schema)
-    # # filters = ('Hosea', 'Rebekah')
-    # assert_df_equality(df, df2)
