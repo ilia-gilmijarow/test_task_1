@@ -4,7 +4,7 @@ from chispa.dataframe_comparer import assert_df_equality
 from pyspark.sql import SparkSession
 from pyspark.sql import utils, dataframe, functions
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from  src import main
+from src import main
 
 class dataReadTests(unittest.TestCase):
 

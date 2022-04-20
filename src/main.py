@@ -4,28 +4,28 @@ from pyspark.sql import SparkSession
 from pyspark.sql import utils, dataframe, functions
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from sys import argv
-from sys import getcwd
+import os
 import logging
 from logging.handlers import RotatingFileHandler
 
 
 #--- https://www.blog.pythonlibrary.org/2014/02/11/python-how-to-create-rotating-logs/ ---
-def create_rotating_log(path):
+def create_rotating_log(path, size=2000):
     """
     Creates a rotating log
     """
     logger = logging.getLogger("Rotating Log")
     logger.setLevel(logging.INFO)
     # add a rotating handler
-    handler = RotatingFileHandler(path, maxBytes=20, backupCount=5)
+    handler = RotatingFileHandler(path, maxBytes=size, backupCount=5)
     logger.addHandler(handler)
     return logger
     
 
 def read_file(file_name, session):
     '''open input file for reading within a session'''
-    log.INFO(f'reading file {file_name}')
-    return session.read.option('compression', 'none').csv(file_name)
+    log.info(f'reading file {file_name}')
+    return session.read.option('header', True).csv(file_name)
    
    
 def filter_df(df, column_name, values):
@@ -40,7 +40,7 @@ def filter_df(df, column_name, values):
     :return: filtered data frame
     :rtype DataFrame:
     '''
-    log.INFO('filtering on f{column_name} with f{str(values)}')
+    log.info('filtering on f{column_name} with f{str(values)}')
     if isinstance(values, Collection):
         filtered = df.filter(functions.col(column_name).isin(values))
     else:
@@ -60,14 +60,16 @@ def rename_columns(df, column_name_mapping):
     '''
     
     for k, v in column_name_mapping.items():
-        log.INFO('renaming column f{k} with f{v}')
+        log.info('renaming column f{k} with f{v}')
         df = df.withColumnRenamed(k, v)
     return df
-    
+
+
+log_file = "KommatiPara.log"
+log = create_rotating_log(log_file)
 
 if __name__ == "__main__":
-    log_file = "test.log"
-    log = create_rotating_log(log_file)
+
     #Check if we have all arguments and inform user otherwise
     if len(argv) < 4:
         msg = ['please provide 3 space-separated arguments:',
@@ -76,16 +78,29 @@ if __name__ == "__main__":
                'example:',
                '         main.py dataset_one.csv dataset_two.csv\n']
         print(*msg, sep='\n')
-        log.ERROR('too few parameters provided')
+        log.error('too few parameters provided')
         exit(1)
     file_one, file_two, countries = argv[1:4]
+    countries = [x.strip() for x in countries.split(',')]
     # read the files
-    
-    # rename columns
-    
+    the_session = SparkSession.builder\
+      .master('local')\
+      .appName('main')\
+      .getOrCreate()
+    df_1 = read_file(file_one, the_session)
+    df_2 = read_file(file_two, the_session)
     # drop irrelvant columns
-    
+    df_1 = df_1.drop('first_name', 'last_name')
+    df_2 = df_2.drop('cc_n')
     # join
-    
-    
+    df_3 = df_1.join(df_2, on='id')
+    # filter
+    df_3 = filter_df(df_3, 'country', countries)
+    # rename columns
+    column_name_mapping = {'id':'client_identifier',
+                            'btc_a':'bitcoin_address',
+                            'cc_t':'credit_card_type'}
+    df_3 = rename_columns(df_3, column_name_mapping)
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    df_3.coalesce(1).write.mode('overwrite').csv(os.path.join(script_path,'..','client_data'))
     
