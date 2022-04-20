@@ -67,6 +67,7 @@ def rename_columns(df, column_name_mapping):
 
 log_file = "KommatiPara.log"
 log = create_rotating_log(log_file)
+log.info('STARTED NEW RUN')
 
 if __name__ == "__main__":
 
@@ -90,9 +91,11 @@ if __name__ == "__main__":
     df_1 = read_file(file_one, the_session)
     df_2 = read_file(file_two, the_session)
     # drop irrelvant columns
+    log.info('dropping unneeded columns')
     df_1 = df_1.drop('first_name', 'last_name')
     df_2 = df_2.drop('cc_n')
     # join
+    log.info('performing join')
     df_3 = df_1.join(df_2, on='id')
     # filter
     df_3 = filter_df(df_3, 'country', countries)
@@ -102,5 +105,7 @@ if __name__ == "__main__":
                             'cc_t':'credit_card_type'}
     df_3 = rename_columns(df_3, column_name_mapping)
     script_path = os.path.dirname(os.path.realpath(__file__))
-    df_3.coalesce(1).write.mode('overwrite').csv(os.path.join(script_path,'..','client_data'))
+    target_path = os.path.join(script_path,'..','client_data')
+    log.info('saving to f{target_path}')
+    df_3.coalesce(1).write.mode('overwrite').csv(target_path)
     
