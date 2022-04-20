@@ -24,4 +24,19 @@ def filter_df(df, column_name, values):
     else:
         filtered = df.filter(col(column_name) == values)
     return filtered
+
+
+def rename_columns(df, column_name_mapping):
+    '''
+    return a data frame with the same data, but with columns renamed according to mapping
+    :param DataFrame df: the data frame
+    :param dict or another mapping column_name_mapping: mapping where keys are existing column names, 
+                                                        and their values are the new column names
+                                                        if there are superfluous keys in the mapping they are ignored.
+    :return: data frame with new column names
+    :rtype DataFrame:
+    '''
+    for k, v in column_name_mapping.items():
+        df = df.withColumnRenamed(k, v)
     
+    return df

@@ -46,8 +46,8 @@ def schema():
 
 
 @pytest.fixture()
-def df(session, schema):
-    data = [
+def data():
+    return [
             (1, 'Hosea', 'Odonnell'),
             (2, 'Murray', 'Weber'),
             (3, 'Emory', 'Giles'),
@@ -58,9 +58,13 @@ def df(session, schema):
             (8, 'Madeline', 'Black'),
             (9, 'Jim', 'Delacruz'),
             (10, 'Abigail', 'Giles')
-            ]
+        ]
+
+
+@pytest.fixture()
+def df(session, schema, data):
     return session.createDataFrame(data=data, schema=schema)
-    
+
 
 def test_filtering_by_collection_leaves_needed_rows(session, schema, df):
     remaining_data = [
@@ -86,3 +90,25 @@ def test_filtering_by_string_leaves_needed_rows(session, schema, df):
     filtered = main.filter_df(df, 'first_name', filters)
     assert_df_equality(remaining_df, filtered)
 
+
+@pytest.fixture()
+def df2(session, data):
+    my_new_schema = StructType([
+                        StructField('id', IntegerType(), nullable=False),
+                        StructField('name', StringType(), nullable=False),
+                        StructField('surname', StringType(), nullable=False),
+                        ])
+    return session.createDataFrame(data=data, schema=my_new_schema)
+
+
+def test_renamed_columns_are_reachable(df, df2):
+    column_remap = {'first_name': 'name', 'last name': 'surname'}
+    df = main.rename_columns(df, column_remap)
+    assert_df_equality(df, df2)
+
+
+def test_renaming_missing_cilumns_is_ignored(df):
+    column_remap = {'my_first_name': 'my name', 'my last name': 'my surname'}
+    df2 = main.rename_columns(df, column_remap)
+    assert_df_equality(df2, df)
+    
