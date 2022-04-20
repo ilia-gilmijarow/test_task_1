@@ -6,3 +6,5 @@ __pycache__
 /src/*.log
 /client_data
 /*.log
+/dist
+/src/KaommatiPara_package_Ilia_Gilmijarow.egg-info
