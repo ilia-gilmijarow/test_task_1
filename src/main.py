@@ -40,7 +40,7 @@ def filter_df(df, column_name, values):
     :return: filtered data frame
     :rtype DataFrame:
     '''
-    log.info('filtering on f{column_name} with f{str(values)}')
+    log.info(f'filtering on fcolumn_name} with {str(values)}')
     if isinstance(values, Collection):
         filtered = df.filter(functions.col(column_name).isin(values))
     else:
@@ -60,7 +60,7 @@ def rename_columns(df, column_name_mapping):
     '''
     
     for k, v in column_name_mapping.items():
-        log.info('renaming column f{k} with f{v}')
+        log.info(f'renaming column {k} with {v}')
         df = df.withColumnRenamed(k, v)
     return df
 
@@ -106,6 +106,6 @@ if __name__ == "__main__":
     df_3 = rename_columns(df_3, column_name_mapping)
     script_path = os.path.dirname(os.path.realpath(__file__))
     target_path = os.path.join(script_path,'..','client_data')
-    log.info('saving to f{target_path}')
+    log.info(f'saving to {target_path}')
     df_3.coalesce(1).write.mode('overwrite').csv(target_path)
     
